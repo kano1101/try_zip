@@ -1,0 +1,37 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_number:
+        description: 'バージョン番号を入力してください。vX.X.X'
+        required: true
+
+
+jobs:
+  build:
+    name: Release binary
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        
+      - name: Run zip
+        run: powershell compress-archive marble.ico ico
+        shell: cmd
+
+      - name: Upload binaries to release
+        uses: svenstaro/upload-release-action@2.1.1
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: ico.zip
+          asset_name: ico.zip
+          tag: ${{ github.ref }}
+          overwrite: true
